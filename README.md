@@ -4,7 +4,7 @@ This C program uses different frequencies of encoded sound data to transfer data
 # The How
 
 test...
-https://github.com/samuelkane526/Acoustic-Data-Transmission/edit/main/README.md#test-jump-point
+https://github.com/samuelkane526/Acoustic-Data-Transmission/blob/main/README.md#test-jump-point
 
 
 
