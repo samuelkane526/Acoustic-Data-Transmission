@@ -10,8 +10,9 @@ This C program uses different frequencies of encoded sound data to transfer data
   The standard sample rate of most onboard microphones is 48,000hz. If we are getting 48,000 samples per second, we can fill up our _FFT_FRAMES_ in 48,000hz/_FFT_SIZE_ ms.
   In this case it is 48,000hz/2048 = 23.4hz. 23.3 is now our frequency range, or our _BIN_SPACING_. This means our program can differentaite between frequencies with at        least a 23.4hz gap (1000hz and 10234.hz). 
 
+  Our sample size is a continious stream of data, our _FFT_FRAMES_ is the area we have loaded into memory, and the _STEP_SIZE_ is the amount we step _FFT_FRAMES_ forward.
+  This means the lower the _STEP_SIZE_ the more times each data section will be analyzed. 
   
-
 # Making the program work for your system:
    The speed, accuracy, and total unuiqe signals transferable are completely dependant on the speakers the decoder is inputting data from, and on the _THRESHOLD_ of the room.
 
