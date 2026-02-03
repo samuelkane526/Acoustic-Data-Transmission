@@ -3,7 +3,9 @@ This C program uses different frequencies of encoded sound data to transfer data
 
 # Getting It To Work:
 
-  Compile command _gcc main.c kissfft-131.2.0/kiss_fft.c -o main.exe -lOle32 -lOleAut32 -lUuid -lm_
+  Compile command: _gcc main.c kissfft-131.2.0/kiss_fft.c -o main.exe -lOle32 -lOleAut32 -lUuid -lm_
+
+  
 
 # The How (Encoder):
   
