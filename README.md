@@ -1,14 +1,11 @@
 # Acoustic-Data-Transmission
 This C program uses different frequencies of encoded sound data to transfer data wirelessly over short distances. 
 
+To run use the program run the exe or compile a new one using ```gcc decoder.c kissfft-131.2.0/kiss_fft.c -o decoder.exe -lOle32 -lOleAut32 -lUuid -lm```
+
 # Getting It To Work:
-
-  Compile command: _gcc main.c kissfft-131.2.0/kiss_fft.c -o main.exe -lOle32 -lOleAut32 -lUuid -lm_
-
   
-
 # The How (Encoder):
-  
 
 # The How (Decoder):
   This program acts as a Frequency-Shift Keying Receiver (FSK). It converts sound data (time domain voltage signals), into frequency-domain voltage specteral data to           identify patterns that corospond to different bytes. 
@@ -22,7 +19,7 @@ This C program uses different frequencies of encoded sound data to transfer data
   Using the _BIN_SPACING_ value we already got, we assign uniuqe values each BIN_SPACING*2 apart. Our _BASE_FREQUENCY_ is 1000hz, so our first data signal is assigned to       1000hz, and our second 1023.43hz. There are 259 total signals we need to repersent, meaning we go up to 6976hz with the defualt values.
 
   **Signal Types:**
-      **HELLO**: Tells the program to start analyzing audio. (Defualt 600hz)
+      **HELLO**: Tells the program to start analyzing audio. (_bin_width*26_)
       **HEADER** Tells the program to start treating next data as header data. (Defualt 800hz)
       **Terminator**: Tells program transmission is finished. (Default 8000hz)
 
