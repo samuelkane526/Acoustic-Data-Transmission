@@ -91,15 +91,15 @@ bool load_config(const char* filename) {
 }
 
 void PrintConfig(int sampleRate) {
-    // 1. Calculate the time it takes to fill the buffer once (Acoustic Fill)
+    // 1. Calculate the time it takes to fill the buffer once
     float windowTimeMs = ((float)FFT_SIZE / sampleRate) * 1000.0f;
     
-    // 2. Calculate the time consumed by the Debounce process (Processing Time)
+    // 2. Calculate the time consumed by the Debounce process
     float stepTimeMs = ((float)STEP_SIZE / sampleRate) * 1000.0f;
     float debounceTimeMs = stepTimeMs * DEBOUNCE_LIMIT;
 
     // 3. The "Ideal" duration is the time to fill the window + the time to stay stable
-    // We add a 15% safety buffer to account for hardware jitter
+    // I added a 15% safety buffer to account for hardware jitter
     float idealDataDurS = (windowTimeMs + debounceTimeMs) / 1000.0f * 1.15f;
 
     printf("\n============================================\n");
@@ -129,7 +129,6 @@ void PrintConfig(int sampleRate) {
 }
 
 int main(void) {
-    // 1. Declare ALL variables at the top to prevent 'goto' bypass errors
     IMMDeviceEnumerator *pEnum = NULL;
     IMMDevice *pDev = NULL;
     IAudioClient *pCl = NULL;
@@ -180,12 +179,12 @@ int main(void) {
         printf(RED_TEXT "ERROR: Audio device was unplugged or changed.\n" RESET_TEXT);
         goto cleanup;
     } else if (FAILED(hr)) {
-        printf(RED_TEXT "ERROR: Failed to start audio stream (0x%08lX)\n" RESET_TEXT, (long)hr);
+        printf(RED_TEXT "ERROR: Failed to start audio stream \n" RESET_TEXT, (long)hr);
         goto cleanup;
     }
 
     // --- AUTO SPACING LOGIC ---
-    // Calculates bin alignment to eliminate spectral leakage (smearing into adjacent bins)
+    // Calculates bin alignment to eliminate smearing into adjacent bins
     BIN_WIDTH = (float)pwfx->nSamplesPerSec / FFT_SIZE;
     if (AUTO_SPACING) {
         BIN_SPACING = BIN_WIDTH * 2.0f;  
@@ -197,10 +196,9 @@ int main(void) {
 
     PrintConfig(pwfx->nSamplesPerSec);
 
-    // KissFFT Setup: https://github.com/mborgerding/kissfft
+    // KissFFT Setup: https://github.com/mborgerding/kissfft (Thanks for the amazing package)
     cfg = kiss_fft_alloc(FFT_SIZE, 0, NULL, NULL);
 
-    // Allocate memory dynamically to prevent "transfer of control bypasses initialization" errors
     in = malloc(sizeof(kiss_fft_cpx) * FFT_SIZE); // FFT input buffer
     out = malloc(sizeof(kiss_fft_cpx) * FFT_SIZE); // FFT output buffer
     slidingBuffer = calloc(FFT_SIZE, sizeof(float)); // Sliding window buffer for audio samples
@@ -231,6 +229,8 @@ int main(void) {
                     stepCounter = 0;
                     for (int j = 0; j < FFT_SIZE; j++) {
                         // HANNING REMOVED: Direct assignment of raw signal
+                        // Hanning Window is an algorithm that splits different frequeinces more clearly and thus is supposed to increase accuracy. However, it caused
+                        // frequencies to be to quite, and unreadable. Would like to try to implement again correctly.
                         in[j].r = slidingBuffer[(writeIdx + j) % FFT_SIZE]; 
                         in[j].i = 0.0f; // Imaginary part 0 for single stream analysis
                     }
@@ -245,7 +245,7 @@ int main(void) {
                         if (m > maxM) { maxM = m; maxI = k; }
                     }
 
-                    // Scaled for Rectangular Window (Raw)
+                    // Scaled for Rectangular Window
                     maxM *= 2.0f; 
 
                     float freq = maxI * BIN_WIDTH;
@@ -271,7 +271,7 @@ int main(void) {
 
                     // --- UI THROTTLING LOGIC ---
                     static int uiThrottle = 0;
-                    if (++uiThrottle >= 15) { // Only update UI approx every 150ms
+                    if (++uiThrottle >= 20) { // Only update UI approx every 200ms so its actually readable
                         if (state == STATE_IDLE) {
                             printf(" MONITORING: Noise: %5.2f | Threshold: %5.2f | Freq: %7.2f\r", maxM, THRESHOLD, freq);                        }
                         uiThrottle = 0;
@@ -387,5 +387,7 @@ cleanup:
     CoUninitialize();
 
     printf("\nDecoder terminated gracefully. Thanks for checking out ChordCast! :D\n");
+    //Thanks for reading the code!
     return 0;
 }
+
