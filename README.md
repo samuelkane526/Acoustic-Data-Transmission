@@ -41,6 +41,59 @@ This C program uses data encoded into sound with the encoder script, and sends t
   Once the "Terminator" signal is heard, the file will be saved automatically to the decoder's directory.
 
 
+# Data Transfer Issues and Fixes
+  This section covers common issues when transmitting files. Since this protocol relies on physical sound waves, your environment (room acoustics) and volume levels are the most critical factors.
+  
+  # 1. Nothing is showing up (No Handshake/Headers)
+  The Issue: The decoder remains in STATE_IDLE and never detects the HELLO or HEADER signals.
+  
+  The Fix:
+  
+  Check Input Device: Ensure the correct microphone is set as the Default Recording Device in Windows Sound Settings. The program automatically grabs the default device on startup.
+  
+  Volume is too low: The signal strength (Mag) is staying below the THRESHOLD. Turn up your source volume.
+  
+  Threshold is too high: If AutoThreshold=0 in your .ini file, try lowering the manual Threshold value (e.g., from 5.0 to 2.0). If AutoThreshold is zero it will ignore your   manual threshold value.
+  
+  # Sample Rate Mismatch: 
+  Ensure both the Encoder and Decoder are operating on the same sample rate (usually 48000Hz). If the Decoder expects 48kHz but the mic provides         44.1kHz, the math     for BIN_WIDTH will be wrong, and it will look for frequencies in the wrong place.
+  
+  # 2. Bytes are being read, but they are all wrong (Garbage Data)
+  The Issue: You see data scrolling in the terminal, but the file is corrupted or the checksum fails.
+  
+  The Fix:
+  
+  Clipping (Distortion): If the volume is too high, the microphone input clips (flatlines), creating "harmonics" (ghost frequencies). This causes the decoder to see           frequencies that aren't actually there. Turn the volume down to about 70-80%.
+  
+  Background Noise: Loud fans, mechanical keyboards, or voices can introduce random frequencies. Enable AutoThreshold=1 or move to a quieter environment.
+  
+  Reverb/Echo: In large empty rooms, the "echo" of the previous byte might overlap with the current one. Move the microphone closer to the speaker (direct line of sight) to overpower the echoes.
+  
+  # 3. Transmission starts, but "drops" bytes (Incomplete Data)
+  The Issue: The transmission finishes, but you get the error: Transmission Failed: Incomplete Data.
+  
+  The Fix:
+  
+  Debounce Limit vs. Speed: The DebounceLimit might be too high for the speed of the transmission. The decoder is waiting too long to confirm a note, and the note ends before it is accepted.
+  
+  Solution: Lower DebounceLimit in decoder_config.ini (e.g., from 6 to 4).
+  
+  Transmission Speed: The encoder might be playing too fast. Increase the DURATION (note length) in the encoder to give the decoder more time to "catch" each byte.
+  
+  Signal "Dip": Laptop speakers often struggle with specific low frequencies. If you consistently lose specific bytes, try increasing the BaseFreq to move the transmission into a higher range that your speakers can handle better.
+  
+  # 4. "Checksum Mismatch" Error
+  The Issue: You received the correct number of bytes (Size matches), but the math doesn't add up.
+  
+  The Fix:
+  
+  This is usually a Bit Flip. One specific frequency was misread as its neighbor (e.g., 1218Hz read as 1265Hz).
+  
+  AutoSpacing: Ensure AutoSpacing=1 is enabled. If you manually tuned frequencies, your BIN_SPACING might be too narrow, causing "Spectral Leakage" where one bin bleeds into another.
+  
+  Stability: Increase DebounceLimit (e.g., from 4 to 6) to force the decoder to be more certain before accepting a byte.
+
+
 # The How (Decoder):
   This program acts as a Frequency-Shift Keying Receiver (FSK). It converts sound data (time domain voltage signals), into frequency-domain voltage spectral data to identify patterns that correspond to different bytes.
   
