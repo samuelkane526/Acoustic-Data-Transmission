@@ -1,0 +1,33 @@
+============================================================
+CHORDCAST PROTOCOL EXTENSIVE TEST SUITE
+============================================================
+
+[1. REPEATER LOGIC TEST]
+AA BB CC DD EE FF GG 00 11 22 33 44 55 66 77 88 99 !! @@ ##
+(The decoder must detect the switch to REPEAT_IDX here)
+
+[2. CHARACTER DIVERSITY]
+Uppercase: ABCDEFGHIJKLMNOPQRSTUVWXYZ
+Lowercase: abcdefghijklmnopqrstuvwxyz
+Numbers:   0123456789
+Symbols:   `~!@#$%^&*()-_=+[{]}\|;:'",<.>/?
+
+[3. FREQUENCY STEPPING (GRADIENT)]
+Ascending:  0123456789:;<=>?@ABCDEFGHIJKLMNO
+Descending: ONMLKJIHGFEDCBA@?>=<;:9876543210
+
+[4. WHITESPACE & TABS]
+Line1[Space] [Space]
+Line2[Tab]	[Tab]
+Line3[Newlines]
+
+[5. STRESS TEST STRING]
+The quick brown fox jumps over the lazy dog. 1234567890.
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
+Multi-byte sequences:   
+
+[6. END OF FILE MARKER]
+--- FINAL BYTE CHECK ---
+Checksum should verify this total string.
+[EOF]
+============================================================
