@@ -1,0 +1,6 @@
+--- CHORDCAST ROBUSTNESS TEST ---
+ABCDEFGHIJKLMNOPQRSTUVWXYZ
+abcdefghijklmnopqrstuvwxyz
+0123456789!@#$%^&*()_+-=[]{}
+
+[END OF TEST]
