@@ -94,6 +94,41 @@ This C program uses data encoded into sound with the encoder script, and sends t
   Stability: Increase DebounceLimit (e.g., from 4 to 6) to force the decoder to be more certain before accepting a byte.
 
 
+# The How (Encoder):
+  The encoder is the "voice" of the program. It takes raw files (text, images, or small binaries) and converts them into a sequence of acoustic tones. These tones are then saved into a standard 16-bit PCM .wav file for playback.
+  
+  # The Transmission Process:
+  Handshake (FREQ_HELLO): The encoder starts by playing a long "Hello" tone. This alerts the decoder that a transmission is about to begin.
+  
+  Metadata (FREQ_HEADER): Before the file data starts, the encoder plays a "Header" tone. Immediately following this, it transmits a ___ChordHeader___ struct which contains:
+  
+  Filename: So the decoder knows what to name the file.
+  
+  FileSize: So the decoder knows when to stop listening.
+  
+  Checksum: A sum calculated from the size of the transmission. It is sent at the start and if the final size of the transmission does not equal it, the program knows it      missed data.
+  
+  Data Payload: The file is broken down byte-by-byte. Each byte (0-255) is mapped to a specific frequency based on the ___BASE_FREQ___ and ___BIN_SPACING___.
+  
+  Termination (FREQ_TERM): Once the last byte is sent, the encoder plays three rapid "Terminator" bursts. This tells the decoder to run checksum and close the file. We use    three to ensure the decoder hears it, as the high frequency can lead to rare errors.
+  
+  Signal Generation and Smoothing:
+  To ensure the audio is clean and doesn't damage speakers or hurt ears with "pops" and "clicks," the encoder uses two specific techniques:
+  
+  Anti-Pop Fading: At the start and end of every single tone, the encoder applies a 5ms "Fade-In" and "Fade-Out." This smooths the transition from silence to sound.
+  
+  The Repeater Logic (REPEAT_IDX): If the encoder needs to send the same byte twice (e.g., the letters "oo" in "room"), playing the same frequency continuously would look     like one long single note to the decoder. To fix this, the encoder switches the second "o" to a special Repeater Frequency. This creates a visible "break" for the decoder   to count the second byte correctly. It is also less harsh on the ears.
+  
+  Timing and Durations:
+  The timing is controlled by the ___DataDur___ and ___ByteGap___ settings in ___encoder_config.ini___.
+  
+  ___DataDur___: How long each frequency is played.
+  
+  ___ByteGap___: A short period of silence between tones to allow the room echoes to die down before the next byte starts.
+  
+  WAV Structure:
+  The encoder generates a Mono, 16-bit PCM wave file. It manually constructs the RIFF header, ensuring the ___overall_size___ and ___data_size___ are accurately calculated    so that any standard media player can play the transmission.
+
 # The How (Decoder):
   This program acts as a Frequency-Shift Keying Receiver (FSK). It converts sound data (time domain voltage signals), into frequency-domain voltage spectral data to identify patterns that correspond to different bytes.
   
